@@ -111,12 +111,12 @@ static int run(void)
 	// alloc mem
 	mem_t send_mem = {
 		.ptr = NULL,
-		.size = 24
+		.size = 60
 	};
 	mem_alloc(&send_mem);
 	mem_t recv_mem = {
 		.ptr = NULL,
-		.size = 24  // 包大小有限制
+		.size = 60  // 包大小有限制, msg的包，size这里最大60
 	};
 	mem_alloc(&recv_mem);
 

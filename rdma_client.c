@@ -91,12 +91,12 @@ static int run(void)
 	// alloc mem
 	mem_t send_mem = {
 		.ptr = NULL,
-		.size =24
+		.size = 60
 	};
 	mem_alloc(&send_mem);
 	mem_t recv_mem = {
 		.ptr = NULL,
-		.size =24
+		.size = 60
 	};
 	mem_alloc(&recv_mem);
 
