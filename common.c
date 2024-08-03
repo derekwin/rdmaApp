@@ -46,22 +46,70 @@ void host_buffer_free(mem_t *buf) {
 void mlu_init(void)
 {
     static pthread_mutex_t cnnl_init_mutex = PTHREAD_MUTEX_INITIALIZER;
-    CNresult ret;
     
-    // cnInit Driver
-    ret = cnInit(0);
-    if (ret != CN_SUCCESS) {
-        rdma_error("failed to cnInit %d", ret);
-        return STATUS_ERROR;
+    int mlu_pci_bus_id;
+	int mlu_pci_device_id;
+	int index;
+    int deviceCount = 0;
+    int mlu_device_id;
+	CNdev cn_device;
+    CNresult error;
+    char name[128];
+    int group_index = 0; // choose first device
+
+	printf("initializing MLU\n");
+	error = cnInit(0);
+	if (error != CN_SUCCESS) {
+		printf("cnInit(0) returned %d\n", error);
+		return; 
+	}
+
+    error = cnDeviceGetCount(&deviceCount);
+	if (error != CN_SUCCESS) {
+		printf("cnDeviceGetCount() returned %d\n", error);
+		return; 
+	}
+    if (deviceCount == 0) {
+		printf("There are no available device(s) that support CUDA\n");
+		return;
     }
 
-    // need create context first
-    CNcontext context;
-	ret = cnCtxCreate(&context, 0, 0);
-	if (ret != CN_SUCCESS) {
-        rdma_error("failed to create cnCtx %d.", ret);
-        return -1;
-    }
+    mlu_device_id = group_index % deviceCount;
+	
+    if (mlu_device_id >= deviceCount) {
+		fprintf(stderr, "No such device ID (%d) exists in system\n", mlu_device_id);
+		return;
+	}
+
+	printf("Listing all MLU devices in system:\n");
+	for (index = 0; index < deviceCount; index++) {
+		ERROR_CHECK(cnDeviceGet(&cn_device, index));
+		cnDeviceGetAttribute(&mlu_pci_bus_id, CN_DEVICE_ATTRIBUTE_PCI_BUS_ID , cn_device);
+		cnDeviceGetAttribute(&mlu_pci_device_id, CN_DEVICE_ATTRIBUTE_PCI_DEVICE_ID , cn_device);
+		printf("MLU device %d: PCIe address is %02X:%02X\n", index, (unsigned int)mlu_pci_bus_id, (unsigned int)mlu_pci_device_id);
+	}
+
+	printf("\nPicking device No. %d\n", mlu_device_id);
+
+    ERROR_CHECK(cnDeviceGet(&cnDevice, mlu_device_id));
+
+	ERROR_CHECK(cnDeviceGetName(name, sizeof(name), mlu_device_id));
+	printf("[pid = %d, dev = %ld] device name = [%s]\n", getpid(), cnDevice, name);
+	printf("creating MLU Ctx\n");
+
+	/* Create context */
+	error = cnCtxCreate(&cnContext, 0, cnDevice);
+	if (error != CN_SUCCESS) {
+		printf("cnCtxCreate() error=%d\n", error);
+		return;
+	}
+
+	printf("making it the current CUDA Ctx\n");
+	error = cnCtxSetCurrent(cnContext);
+	if (error != CN_SUCCESS) {
+		printf("cnCtxSetCurrent() error=%d\n", error);
+		return;
+	}
 
     gpu_initialized = 1;
 
@@ -95,6 +143,7 @@ void mlu_buffer_free(mem_t *buf) {
     if (buf->ptr) {
 		free(buf->ptr);
 	}
+    ERROR_CHECK(cnCtxDestroy(cnContext));
 }
 #endif
 

@@ -5,6 +5,7 @@
 #include "cnrt.h"
 #include "mlu_op.h"
 #include "cn_api.h" // CNresult
+#include <unistd.h> // getpid()
 #endif
 #if HAVE_ROCM_RUNTIME
 #include <hsa.h>
@@ -41,6 +42,33 @@ void host_buffer_free(mem_t *buf);
 #endif
 
 #if HAVE_MLU_RUNTIME
+static inline const char *getErrorName(CNresult error)
+{
+    const char *str;
+    cnGetErrorName(error, &str);
+    return str;
+}
+
+static inline const char *getErrorString(CNresult error)
+{
+    const char *str;
+    cnGetErrorString(error, &str);
+    return str;
+}
+#define ERROR_CHECK(ret)                                                                           \
+     do {                                                                                           \
+         CNresult r__ = (ret);                                                                      \
+         if (r__ != CN_SUCCESS) {                                                                   \
+             printf(                                                                                \
+                 "error occur, func: %s, line: %d, ret:%d, cn_error_code:%s, cn_error_string:%s\n", \
+                 __func__, __LINE__, r__, getErrorName(r__), getErrorString(r__));                  \
+             return;                                                                               \
+         }                                                                                          \
+     } while (0)
+
+static CNdev cnDevice;
+static CNcontext cnContext;
+
 void mlu_init();
 void mlu_buffer_malloc(mem_t *buf);
 void mlu_buffer_free(mem_t *buf);

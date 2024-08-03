@@ -102,10 +102,10 @@ static int run(void)
 		       "using sge sends\n");
 	
 	// init gpu driver
-	#if DHAVE_MLU_RUNTIME
+	#if HAVE_MLU_RUNTIME
 		mlu_init();
 	#endif
-	#if DHAVE_ROCM_RUNTIME
+	#if HAVE_ROCM_RUNTIME
 		rocm_init();
 	#endif
 	// alloc mem
