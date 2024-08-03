@@ -105,7 +105,7 @@ void rocm_init(void)
     hsa_status_t hsa_status;
 
     if (pthread_mutex_lock(&rocm_init_mutex) == 0) {
-        if (rocm_initialized) {
+        if (gpu_initialized) {
             goto end;
         }
     } else  {
@@ -117,12 +117,6 @@ void rocm_init(void)
     hsa_status = hsa_init();
     if (hsa_status != HSA_STATUS_SUCCESS) {
         rdma_error("Failure to open HSA connection: 0x%x", hsa_status);
-        goto end;
-    }
-
-    hsa_status = hsa_iterate_agents(rocm_hsa_agent_callback, NULL);
-    if (hsa_status != HSA_STATUS_SUCCESS) {
-        rdma_error("Failure to iterate HSA agents: 0x%x", hsa_status);
         goto end;
     }
 

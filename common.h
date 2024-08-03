@@ -47,6 +47,13 @@ void mlu_buffer_free(mem_t *buf);
 #endif
 
 #if HAVE_ROCM_RUNTIME
+#define MAX_AGENTS 127
+static struct agents {
+    int num;
+    hsa_agent_t agents[MAX_AGENTS];
+    int num_gpu;
+    hsa_agent_t gpu_agents[MAX_AGENTS];
+} rocm_agents;
 void rocm_init();
 void rocm_buffer_malloc(mem_t *buf);
 void rocm_buffer_free(mem_t *buf);

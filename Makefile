@@ -7,7 +7,7 @@ LFLAGS = -libverbs -lrdmacm
 BUILD_DIR := build
 
 # MLU = /usr/local/neuware
-# ROCM = /usr/local/neuware
+ROCM = /opt/dtk
 
 ifndef MLU
 ifndef ROCM
