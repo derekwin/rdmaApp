@@ -132,6 +132,7 @@ void mlu_buffer_malloc(mem_t *buf) {
     }
 
     buf->ptr = (void *)buf->addr;
+    rdma_info("allocated %d bytes of mlu memory at 0x%p", buf->size, buf->ptr);
 }
 
 void mlu_buffer_free(mem_t *buf) {

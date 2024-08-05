@@ -16,11 +16,11 @@
 
 /* Error Macro*/
 #define rdma_error(msg, args...) do {\
-	fprintf(stderr, "%s : %d : ERROR : " msg, __FILE__, __LINE__, ## args);\
+	fprintf(stderr, "%s : %d : ERROR : " msg "\n", __FILE__, __LINE__, ## args);\
 }while(0);
-/* Error Macro*/
+/* Info Macro*/
 #define rdma_info(msg, args...) do {\
-	fprintf(stderr, "%s : %d : INFO : " msg, __FILE__, __LINE__, ## args);\
+	fprintf(stderr, "%s : %d : INFO : " msg "\n", __FILE__, __LINE__ , ## args);\
 }while(0);
 
 static int gpu_initialized = 0;
